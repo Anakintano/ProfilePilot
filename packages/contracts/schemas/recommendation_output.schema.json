@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profilepilot.dev/schemas/recommendation_output.schema.json",
+  "title": "RecommendationGenerationOutput",
+  "description": "Structured output required from the recommendation-generation LLM stage. One object per recommendation. The model must ground every rewrite in a quoted span of the candidate's own extracted text (evidence_span) — it must never invent achievements.",
+  "type": "object",
+  "required": ["recommendations"],
+  "additionalProperties": false,
+  "properties": {
+    "recommendations": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": [
+          "dimension",
+          "expected_impact",
+          "effort",
+          "source_section",
+          "evidence_span",
+          "proposed_rewrite",
+          "rationale"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "dimension": { "type": "string", "description": "Rubric dimension this recommendation improves." },
+          "expected_impact": { "type": "string", "enum": ["low", "medium", "high"] },
+          "effort": { "type": "string", "enum": ["low", "medium", "high"] },
+          "source_section": { "type": "string", "description": "Section of the profile this applies to, e.g. 'experience.0'." },
+          "evidence_span": {
+            "type": "string",
+            "description": "Verbatim quote from the candidate's extracted text that this rewrite is grounded in. Empty string only if no existing text applies (net-new suggestion)."
+          },
+          "proposed_rewrite": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "rationale": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "research_citation_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IDs of research_documents rows retrieved for this recommendation, if any."
+          }
+        }
+      }
+    }
+  }
+}

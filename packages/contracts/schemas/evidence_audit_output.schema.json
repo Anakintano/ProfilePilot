@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profilepilot.dev/schemas/evidence_audit_output.schema.json",
+  "title": "EvidenceAuditOutput",
+  "description": "Structured output required from the Evidence Auditor stage. Audits each generated recommendation against the candidate's own extracted evidence. Must never claim to prove personal achievements — only flag unsupported, contradictory, vague, or unverifiable statements.",
+  "type": "object",
+  "required": ["audits"],
+  "additionalProperties": false,
+  "properties": {
+    "audits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["recommendation_index", "audit_status", "notes"],
+        "additionalProperties": false,
+        "properties": {
+          "recommendation_index": { "type": "integer", "minimum": 0 },
+          "audit_status": {
+            "type": "string",
+            "enum": ["supported", "unsupported", "vague", "contradictory"]
+          },
+          "notes": { "type": "string", "maxLength": 500 }
+        }
+      }
+    }
+  }
+}

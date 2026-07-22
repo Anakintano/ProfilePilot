@@ -1,0 +1,17 @@
+psycopg[binary]==3.2.3
+psycopg_pool==3.2.4
+redis==5.2.1
+pydantic==2.10.4
+pydantic-settings==2.7.1
+jsonschema==4.23.0
+httpx==0.28.1
+pymupdf==1.24.14
+Pillow==11.0.0
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+
+# OCR: heavy, optional-at-runtime. If this layer fails to build or the models
+# fail to download at first use, the pipeline degrades to embedded-text-only
+# extraction rather than failing the whole app (see app/extraction/ocr.py).
+paddlepaddle==2.6.2
+paddleocr==2.9.1

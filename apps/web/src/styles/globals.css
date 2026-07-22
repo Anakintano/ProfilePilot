@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Color tokens are space-separated RGB triplets (not hex) so Tailwind's
+   `<alpha-value>` opacity modifiers (e.g. border-ink/10, text-ink/70 — used
+   throughout this codebase) keep working per-theme. See tailwind.config.ts,
+   where these are wrapped as rgb(var(--color-x) / <alpha-value>). Token
+   *names* never change, only what they resolve to, so no component needs
+   updating for dark mode. */
+:root {
+  --color-cream: 244 240 231;
+  --color-ink: 24 34 32;
+  --color-teal: 23 107 99;
+  --color-amber: 201 133 47;
+  --color-red: 168 68 62;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+/* Default-follows-system: applies when the user hasn't made an explicit
+   choice (no data-theme attribute set yet, or JS disabled). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-cream: 20 32 30;
+    --color-ink: 240 237 228;
+    --color-teal: 79 189 179;
+    --color-amber: 224 160 80;
+    --color-red: 217 107 98;
+  }
+}
+
+/* Explicit manual toggle always wins in both directions, regardless of OS
+   preference — higher specificity than the plain :root media-query block
+   above beats it independent of source order. */
+:root[data-theme="dark"] {
+  --color-cream: 20 32 30;
+  --color-ink: 240 237 228;
+  --color-teal: 79 189 179;
+  --color-amber: 224 160 80;
+  --color-red: 217 107 98;
+}
+
+:root[data-theme="light"] {
+  --color-cream: 244 240 231;
+  --color-ink: 24 34 32;
+  --color-teal: 23 107 99;
+  --color-amber: 201 133 47;
+  --color-red: 168 68 62;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background-color: rgb(var(--color-cream));
+  color: rgb(var(--color-ink));
+}
+
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid rgb(var(--color-teal));
+  outline-offset: 2px;
+}

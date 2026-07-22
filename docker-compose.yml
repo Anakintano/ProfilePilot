@@ -1,0 +1,88 @@
+name: profilepilot
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-profilepilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-profilepilot}
+      POSTGRES_DB: ${POSTGRES_DB:-profilepilot}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-profilepilot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./services/api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-profilepilot}:${POSTGRES_PASSWORD:-profilepilot}@postgres:5432/${POSTGRES_DB:-profilepilot}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_DIR: /data/uploads
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/data/uploads
+      - ./services/api/app:/app/app
+      - ./db/migrations:/app/db/migrations:ro
+      - ./packages/contracts/schemas:/app/packages/contracts/schemas:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build:
+      context: ./services/worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-profilepilot}:${POSTGRES_PASSWORD:-profilepilot}@postgres:5432/${POSTGRES_DB:-profilepilot}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_DIR: /data/uploads
+    volumes:
+      - uploads_data:/data/uploads
+      - ./services/worker/app:/app/app
+      - ./db/migrations:/app/db/migrations:ro
+      - ./packages/contracts/schemas:/app/packages/contracts/schemas:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./packages/contracts/src:/app/packages/contracts/src
+    depends_on:
+      - api
+
+volumes:
+  pg_data:
+  uploads_data:

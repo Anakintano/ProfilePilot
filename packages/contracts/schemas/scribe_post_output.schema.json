@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profilepilot.dev/schemas/scribe_post_output.schema.json",
+  "title": "ScribePostOutput",
+  "description": "Structured output required from the Scribe post-writer LLM stage. A single LinkedIn post draft plus optional hashtags.",
+  "type": "object",
+  "required": ["post_text"],
+  "additionalProperties": false,
+  "properties": {
+    "post_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "The generated LinkedIn post body."
+    },
+    "hashtags": {
+      "type": "array",
+      "maxItems": 10,
+      "items": { "type": "string" },
+      "description": "Optional hashtags to append to the post, without the leading '#'."
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profilepilot.dev/schemas/scribe_comment_output.schema.json",
+  "title": "ScribeCommentOutput",
+  "description": "Structured output required from the Scribe comment-generator LLM stage. A single reply comment for an existing LinkedIn post.",
+  "type": "object",
+  "required": ["comment_text"],
+  "additionalProperties": false,
+  "properties": {
+    "comment_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500,
+      "description": "The generated comment text."
+    }
+  }
+}
