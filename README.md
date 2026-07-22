@@ -10,6 +10,45 @@ This is a portfolio/beta project (see "What this is not" below), built to
 demonstrate a real async-job backend, a measurable OCR pipeline, and
 LLM-assisted-but-verifiable scoring — not a production hiring tool.
 
+## Highlights
+
+Quick-recall list of the parts worth talking through in an interview:
+
+- **Durable job queue on plain Postgres** — `FOR UPDATE SKIP LOCKED` claiming,
+  exponential backoff + jitter retries, dead-lettering, a stale-job reclaim
+  sweep — no Redis/Celery/broker dependency for the core pipeline.
+- **Hybrid PDF extraction** — embedded-text-first via PyMuPDF, OCR fallback
+  via PaddleOCR, with a custom **column-aware reading-order** algorithm
+  (gap-based x-position clustering) so two-column LinkedIn exports don't
+  interleave sidebar and main-column content.
+- **Evidence-audited LLM output** — every generated recommendation is
+  checked against a verbatim quote from the candidate's own document by a
+  deterministic auditor before it's ever shown; scoring itself never calls
+  an LLM at all (see `docs/adr/0003-*`).
+- **Local-first LLM routing with a real fallback** — Groq → OpenRouter → a
+  deterministic zero-network provider, so the app (including the "AI"
+  features) is fully functional with zero API keys configured.
+- **SSE progress streaming with correct resume semantics** — `Last-Event-ID`
+  based resume, not naive full-history replay or polling.
+- **A second full feature reusing the same architecture** — Scribe
+  (LinkedIn post/comment writer) reuses the provider-router pattern end to
+  end, with optional DuckDuckGo web-search grounding.
+- **Ran the whole stack natively on Windows, no Docker** — after Docker
+  Desktop proved unreliable mid-build, rebuilt the dev setup around
+  EnterpriseDB's no-install Postgres binaries running as a plain user
+  process (see `docs/adr/0006-native-dev-fallback.md`).
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| Frontend | Next.js 15 (App Router), TypeScript, Tailwind CSS |
+| Backend | FastAPI, Python 3.11, Pydantic |
+| Worker | Plain Python job loop, PyMuPDF, PaddleOCR, OpenCV |
+| Data | PostgreSQL 16 (advisory-locked migrations, SKIP LOCKED queue) |
+| LLM | Groq, OpenRouter, JSON-Schema-validated structured output |
+| Infra | Docker Compose (primary) / native Windows scripts (fallback), Redis (optional, fails open) |
+
 ## What this is
 
 - A **typed, durable workflow**: `ingest → extract → normalize → score →
