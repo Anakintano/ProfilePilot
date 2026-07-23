@@ -1,4 +1,5 @@
 .runtime/
+.claude/
 node_modules/
 .next/
 out/
